@@ -6,8 +6,6 @@ import com.catalog.eligibleads.response.EligibleAdvertisementsResponse;
 
 public interface EligibleAdvertisementResource {
 
-	public ResponseEntity<EligibleAdvertisementsResponse> findEligibleAds(String meliId, String accessToken);
-
-	public ResponseEntity<Void> saveAllEligibleAds();
+	public ResponseEntity<EligibleAdvertisementsResponse> findEligibleAds(String meliId, String accessToken, Long limit, Long page);
 
 }

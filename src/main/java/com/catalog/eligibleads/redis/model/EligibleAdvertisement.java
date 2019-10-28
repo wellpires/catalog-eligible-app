@@ -1,7 +1,9 @@
 package com.catalog.eligibleads.redis.model;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 import javax.persistence.Id;
 
@@ -9,8 +11,10 @@ import org.springframework.data.annotation.Reference;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.index.Indexed;
 
-@RedisHash("EligibleAdvertisement")
-public class EligibleAdvertisement {
+@RedisHash(value = "eligibleAd", timeToLive = 86400)
+public class EligibleAdvertisement implements Serializable {
+
+	private static final long serialVersionUID = -2795955666775572028L;
 
 	@Id
 	private Long id;
@@ -29,10 +33,12 @@ public class EligibleAdvertisement {
 	private Long availableQuantity;
 	@Reference
 	private List<Attribute> attributes;
+	@Indexed
 	private Long variationId;
 	private String permalink;
 	@Indexed
 	private String meliId;
+	@Indexed
 	private String mlbId;
 
 	public Long getId() {
@@ -185,6 +191,22 @@ public class EligibleAdvertisement {
 
 	public String getMlbId() {
 		return mlbId;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(meliId, mlbId, variationId);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!(obj instanceof EligibleAdvertisement))
+			return false;
+		EligibleAdvertisement other = (EligibleAdvertisement) obj;
+		return Objects.equals(meliId, other.meliId) && Objects.equals(mlbId, other.mlbId)
+				&& Objects.equals(variationId, other.variationId);
 	}
 
 }

@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -27,6 +28,7 @@ import com.catalog.eligibleads.dto.MeliDTO;
 import com.catalog.eligibleads.enums.AdvertisementStatus;
 import com.catalog.eligibleads.enums.Order;
 import com.catalog.eligibleads.function.AdvertisementItemDTO2ListAdvertisementDTOFunction;
+import com.catalog.eligibleads.redis.repository.EligibleAdsRepository;
 import com.catalog.eligibleads.service.AdvertisementService;
 import com.catalog.eligibleads.service.ItemService;
 import com.catalog.eligibleads.service.MeliService;
@@ -41,6 +43,9 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 
 	@Autowired
 	private MeliService meliService;
+
+	@Autowired
+	private EligibleAdsRepository eligibleAdvertisementRepository;
 
 	private static final String URL_ELIGIBLE_ADS = "https://api.mercadolibre.com/items/{itemId}/catalog_listing_eligibility";
 
@@ -73,7 +78,21 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 		advertisementsDTOs.stream().forEach(eligibleAd -> {
 			eligibleAd.setMeliId(meli.getId());
 		});
-		return advertisementsDTOs;
+
+		return removeExistingAdvertisements(advertisementsDTOs);
+	}
+
+	private List<AdvertisementDTO> removeExistingAdvertisements(List<AdvertisementDTO> advertisementsDTOs) {
+		return advertisementsDTOs.stream().filter(ad -> advertisementsDTOs.stream().noneMatch(this::isRegisterExists))
+				.collect(Collectors.toList());
+	}
+
+	private boolean isRegisterExists(AdvertisementDTO adDTO) {
+
+		Long variationId = Optional.ofNullable(adDTO.getVariationId()).orElse(0l);
+
+		return eligibleAdvertisementRepository
+				.findByVariationIdAndMeliIdAndMlbId(variationId, adDTO.getMeliId(), adDTO.getId()).isPresent();
 	}
 
 	private List<AdvertisementDTO> createAdvertisements(List<ElegibleAdvertisementDTO> eligiblesAds,

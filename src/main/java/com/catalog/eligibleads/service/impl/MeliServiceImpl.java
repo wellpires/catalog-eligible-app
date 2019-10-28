@@ -2,6 +2,7 @@ package com.catalog.eligibleads.service.impl;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,8 +20,8 @@ public class MeliServiceImpl implements MeliService {
 
 	@Override
 	public List<MeliDTO> findAllActivatedMeli() {
-		return Arrays.asList(
-				this.meliRepository.findById("111412004").map(new Meli2MeliDTOFunction()).orElse(new MeliDTO()));
+		return this.meliRepository.findAllById(Arrays.asList("228145111", "111412004")).stream()
+				.map(new Meli2MeliDTOFunction()).collect(Collectors.toList());
 //		return meliRepository.findByActiveIs(true).stream().map(new Meli2MeliDTOFunction())
 //				.collect(Collectors.toList());
 	}
