@@ -133,20 +133,11 @@ public class FilterDTO {
 //		if(buscaPublica && StringUtils.isNotBlank(sellerId)) {
 //			mapa.put("seller_id", sellerId);
 //		}
-
-		parameters.add("offset", String.valueOf(offset));
+		if (Objects.nonNull(offset)) {
+			parameters.add("offset", String.valueOf(offset));
+		}
 
 		return parameters;
 	}
-
-//	category_id=linkteste
-//limit=25
-//listing_type_id=gold_pro
-//offset=0
-//orders=start_time_asc
-//query=titulomlb
-//sku=skuteste
-//status=active
-//access_token=APP_USR-189141373421891-102620-ec4093d5f2008ccaa5f98fad3d810873-111412004
 
 }

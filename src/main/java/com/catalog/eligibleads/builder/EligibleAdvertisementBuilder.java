@@ -103,7 +103,7 @@ public class EligibleAdvertisementBuilder {
 	}
 
 	public EligibleAdvertisementBuilder variationId(Long variationId) {
-		this.variationId = variationId;
+		this.variationId = variationId == 0 ? null : variationId;
 		return this;
 	}
 

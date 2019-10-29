@@ -77,6 +77,7 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 		List<AdvertisementDTO> advertisementsDTOs = createAdvertisements(eligiblesAds, advertisementBuyBoxes);
 		advertisementsDTOs.stream().forEach(eligibleAd -> {
 			eligibleAd.setMeliId(meli.getId());
+			eligibleAd.setVariationId(Optional.ofNullable(eligibleAd.getVariationId()).orElse(0l));
 		});
 
 		return removeExistingAdvertisements(advertisementsDTOs);
@@ -88,11 +89,9 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 	}
 
 	private boolean isRegisterExists(AdvertisementDTO adDTO) {
-
-		Long variationId = Optional.ofNullable(adDTO.getVariationId()).orElse(0l);
-
 		return eligibleAdvertisementRepository
-				.findByVariationIdAndMeliIdAndMlbId(variationId, adDTO.getMeliId(), adDTO.getId()).isPresent();
+				.findByVariationIdAndMeliIdAndMlbId(adDTO.getVariationId(), adDTO.getMeliId(), adDTO.getId())
+				.isPresent();
 	}
 
 	private List<AdvertisementDTO> createAdvertisements(List<ElegibleAdvertisementDTO> eligiblesAds,
