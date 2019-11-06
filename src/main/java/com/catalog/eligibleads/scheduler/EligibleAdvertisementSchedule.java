@@ -16,7 +16,7 @@ public class EligibleAdvertisementSchedule {
 	@Autowired
 	private EligibleAdvertisementService eligibleAdvertisementService;
 
-	@Scheduled(cron = "*/3600 * * * * *")
+	@Scheduled(fixedDelayString = "${schedule.interval.one-hour}")
 	public void selectEligibleAds() {
 
 		logger.info("Eligible Ads search was started!");

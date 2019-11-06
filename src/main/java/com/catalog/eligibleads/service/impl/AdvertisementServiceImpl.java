@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -39,6 +40,9 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 	private static final int LIMIT_MULTI_GET = 20;
 
 	@Autowired
+	private RestTemplate client;
+
+	@Autowired
 	private ItemService itemService;
 
 	@Autowired
@@ -47,7 +51,8 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 	@Autowired
 	private EligibleAdsRepository eligibleAdvertisementRepository;
 
-	private static final String URL_ELIGIBLE_ADS = "https://api.mercadolibre.com/items/{itemId}/catalog_listing_eligibility";
+	@Value("${api.mercadolivre.items.catalog-listing-eligibility}")
+	private String urlEligibleAds;
 
 	@Override
 	public List<AdvertisementDTO> findAdvertisements() {
@@ -105,13 +110,11 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 		List<BuyBoxVariationDTO> variations = eligiblesAds.stream().map(elegible -> elegible.getBuyBoxVariations())
 				.flatMap(Collection::stream).collect(Collectors.toList());
 
-		advertisements = advertisements.stream()
+		return advertisements.stream()
 				.filter(advertisement -> Objects.isNull(advertisement.getVariationId())
 						|| variations.stream().map(BuyBoxVariationDTO::getId).collect(Collectors.toList())
 								.contains(advertisement.getVariationId().toString()))
 				.collect(Collectors.toList());
-
-		return advertisements;
 	}
 
 	private List<AdvertisementDTO> filterByEligibleAdId(List<ElegibleAdvertisementDTO> elegibleAds,
@@ -140,11 +143,10 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 
 	private ElegibleAdvertisementDTO configClient(Map<String, String> parameter, MeliDTO meli) {
 
-		URI findEligibleAd = UriComponentsBuilder.fromHttpUrl(URL_ELIGIBLE_ADS)
+		URI findEligibleAd = UriComponentsBuilder.fromHttpUrl(urlEligibleAds)
 				.queryParam("access_token", meli.getAccessToken()).buildAndExpand(parameter).toUri();
 
-		RestTemplate rest = new RestTemplate();
-		return rest.getForEntity(findEligibleAd, ElegibleAdvertisementDTO.class).getBody();
+		return client.getForEntity(findEligibleAd, ElegibleAdvertisementDTO.class).getBody();
 
 	}
 

@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.catalog.eligibleads.builder.AdvertisementDTOWrapperBuilder;
 import com.catalog.eligibleads.dto.AdvertisementDTO;
 import com.catalog.eligibleads.dto.AdvertisementRequestDTO;
 import com.catalog.eligibleads.function.AdvertisementDTO2EligibleAdvertisementFunction;
@@ -51,12 +52,10 @@ public class EligibleAdvertisementServiceImpl implements EligibleAdvertisementSe
 		Page<EligibleAdvertisement> pageResult = eligibleAdvertisementRepository
 				.findByMeliId(advertisementRequestDTO.getMeliId(), paging);
 
-		AdvertisementDTOWrapper wrapper = new AdvertisementDTOWrapper();
-		wrapper.setAdvertisementsDTO(pageResult.getContent().stream()
-				.map(new EligibleAdvertisement2AdvertisementDTOFunction()).collect(Collectors.toList()));
-		wrapper.setTotalElements(pageResult.getTotalElements());
-
-		return wrapper;
+		return new AdvertisementDTOWrapperBuilder()
+				.advertisementsDTO(pageResult.getContent().stream()
+						.map(new EligibleAdvertisement2AdvertisementDTOFunction()).collect(Collectors.toList()))
+				.totalElements(pageResult.getTotalElements()).build();
 	}
 
 }

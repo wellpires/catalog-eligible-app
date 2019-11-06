@@ -39,7 +39,8 @@ public class AdvertisementItemDTO2ListAdvertisementDTOFunction
 				.availableQuantity(advertisementItemDTO.getAvailableQuantity())
 				.permalink(
 						advertisementItemDTO.getPermalink().concat("?variation=".concat(variation.getId().toString())))
-				.variationName(getVariationName(variation)).variationId(variation.getId()).build();
+				.variationName(getVariationName(variation))
+				.variationId(variation.getId()).build();
 	}
 
 	private String getVariationName(AdvertisementVariationDTO variation) {

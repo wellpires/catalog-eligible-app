@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
@@ -24,19 +26,24 @@ import com.catalog.eligibleads.service.ItemService;
 @Service
 public class ItemServiceImpl implements ItemService {
 
-	private static final String URL_SEARCH_ITEMS = "https://api.mercadolibre.com/users/{meli_id}/items/search";
-	private static final String URL_SEARCH_PRODUCT = "https://api.mercadolibre.com/items";
+	@Value("${api.mercadolivre.users.items-search}")
+	private String urlSearchItems;
+
+	@Value("${api.mercadolivre.items}")
+	private String urlSearchProduct;
+
+	@Autowired
+	private RestTemplate client;
 
 	@Override
 	public ItemsResponseDTO findItems(FilterDTO filterDTO, MeliDTO meli) {
 
 		Map<String, Object> variables = new HashMap<String, Object>();
 		variables.put("meli_id", meli.getId());
-		URI buscarCliente = UriComponentsBuilder.fromHttpUrl(URL_SEARCH_ITEMS).queryParams(filterDTO.getParameters())
+		URI buscarCliente = UriComponentsBuilder.fromHttpUrl(urlSearchItems).queryParams(filterDTO.getParameters())
 				.queryParam("access_token", meli.getAccessToken()).buildAndExpand(variables).toUri();
 
-		RestTemplate rest = new RestTemplate();
-		return rest.getForEntity(buscarCliente, ItemsResponseDTO.class).getBody();
+		return client.getForEntity(buscarCliente, ItemsResponseDTO.class).getBody();
 	}
 
 	@Override
@@ -45,10 +52,9 @@ public class ItemServiceImpl implements ItemService {
 		MultiValueMap<String, String> queryParameter = new LinkedMultiValueMap<>();
 		queryParameter.add("ids", Stream.of(ids).collect(Collectors.joining(",")));
 		queryParameter.add("access_token", meli.getAccessToken());
-		String uri = UriComponentsBuilder.fromHttpUrl(URL_SEARCH_PRODUCT).queryParams(queryParameter).toUriString();
+		String uri = UriComponentsBuilder.fromHttpUrl(urlSearchProduct).queryParams(queryParameter).toUriString();
 
-		RestTemplate rest = new RestTemplate();
-		return rest.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<List<ItemResponseDTO>>() {
+		return client.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<List<ItemResponseDTO>>() {
 		}).getBody();
 	}
 
