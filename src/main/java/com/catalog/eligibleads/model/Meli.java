@@ -21,6 +21,9 @@ public class Meli implements Serializable {
 	private String accessToken;
 	private Boolean active;
 
+	@Column(name = "refreshtoken")
+	private String refreshToken;
+
 	public String getId() {
 		return id;
 	}
@@ -51,6 +54,14 @@ public class Meli implements Serializable {
 
 	public void setActive(Boolean active) {
 		this.active = active;
+	}
+
+	public void setRefreshToken(String refreshToken) {
+		this.refreshToken = refreshToken;
+	}
+
+	public String getRefreshToken() {
+		return refreshToken;
 	}
 
 }
