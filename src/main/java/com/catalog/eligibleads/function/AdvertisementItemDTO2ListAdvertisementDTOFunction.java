@@ -3,6 +3,7 @@ package com.catalog.eligibleads.function;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -40,7 +41,7 @@ public class AdvertisementItemDTO2ListAdvertisementDTOFunction
 				.permalink(
 						advertisementItemDTO.getPermalink().concat("?variation=".concat(variation.getId().toString())))
 				.variationName(getVariationName(variation))
-				.variationId(variation.getId()).build();
+				.variationId(Optional.ofNullable(variation.getId()).orElse(0l)).build();
 	}
 
 	private String getVariationName(AdvertisementVariationDTO variation) {

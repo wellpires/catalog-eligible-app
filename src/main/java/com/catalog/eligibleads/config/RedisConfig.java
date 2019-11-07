@@ -1,5 +1,6 @@
 package com.catalog.eligibleads.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
@@ -12,14 +13,13 @@ public class RedisConfig {
 	@Bean
 	public JedisConnectionFactory jedisConnectionFactory() {
 		RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration("localhost", 6379);
-//	    redisStandaloneConfiguration.setPassword(RedisPassword.of("yourRedisPasswordIfAny"));
 		return new JedisConnectionFactory(redisStandaloneConfiguration);
 	}
 
 	@Bean
-	public RedisTemplate<String, Object> redisTemplate() {
+	public RedisTemplate<String, Object> redisTemplate(@Autowired JedisConnectionFactory jedisConnectionFactory) {
 		RedisTemplate<String, Object> template = new RedisTemplate<>();
-		template.setConnectionFactory(jedisConnectionFactory());
+		template.setConnectionFactory(jedisConnectionFactory);
 		return template;
 	}
 

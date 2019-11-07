@@ -6,11 +6,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -37,6 +37,8 @@ import com.catalog.eligibleads.service.MeliService;
 @Service
 public class AdvertisementServiceImpl implements AdvertisementService {
 
+	private static final Logger logger = LoggerFactory.getLogger(AdvertisementServiceImpl.class);
+
 	private static final int LIMIT_MULTI_GET = 20;
 
 	@Autowired
@@ -56,15 +58,18 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 
 	@Override
 	public List<AdvertisementDTO> findAdvertisements() {
-		return meliService.findAllActivatedMeli().stream().map(this::findEligibleAds).flatMap(Collection::stream)
-				.collect(Collectors.toList());
+		return meliService.findAllActivatedMeli().stream().map(this::findEligibleAds)
+				.filter(CollectionUtils::isNotEmpty).flatMap(Collection::stream).collect(Collectors.toList());
 	}
 
 	private List<AdvertisementDTO> findEligibleAds(MeliDTO meli) {
 
+		logger.info("Finding eligible advertisements for {} account", meli.getNomeConta());
+
 		FilterDTO filterDTO = new FilterDTOBuilder().accessToken(meli.getAccessToken()).limit(50l)
 				.order(Order.START_TIME_ASC).status(AdvertisementStatus.ACTIVE).build();
 
+		logger.info("{} account - Finding advertisements", meli.getNomeConta());
 		List<String> items = new ArrayList<>();
 		for (int offset = 0; offset < 1000; offset += 50) {
 			filterDTO.setOffset(offset);
@@ -75,17 +80,35 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 			items.addAll(itemsResponse.getItems());
 		}
 
+		if (isContaHasNoAds(items)) {
+			logger.info("{} account has no advertisements", meli.getNomeConta());
+			return Collections.emptyList();
+		}
+
+		logger.info("{} account - Finding eligible advertisements", meli.getNomeConta());
 		List<ElegibleAdvertisementDTO> eligiblesAds = findEachEligibleAds(items, meli);
 
+		if (isContaHasNoEligibleAds(eligiblesAds)) {
+			logger.info("{} account has no eligible advertisements", meli.getNomeConta());
+			return Collections.emptyList();
+		}
+
+		logger.info("{} account - Finding eligible advertisements", meli.getNomeConta());
 		List<AdvertisementItemDTO> advertisementBuyBoxes = searchProducts(eligiblesAds, meli);
 
-		List<AdvertisementDTO> advertisementsDTOs = createAdvertisements(eligiblesAds, advertisementBuyBoxes);
-		advertisementsDTOs.stream().forEach(eligibleAd -> {
-			eligibleAd.setMeliId(meli.getId());
-			eligibleAd.setVariationId(Optional.ofNullable(eligibleAd.getVariationId()).orElse(0l));
-		});
+		List<AdvertisementDTO> advertisementsDTOs = createAdvertisements(eligiblesAds, advertisementBuyBoxes, meli);
 
+		logger.info("{} account - Removing eligible advertisements that already exists in database",
+				meli.getNomeConta());
 		return removeExistingAdvertisements(advertisementsDTOs);
+	}
+
+	private boolean isContaHasNoEligibleAds(List<ElegibleAdvertisementDTO> eligiblesAds) {
+		return CollectionUtils.isEmpty(eligiblesAds);
+	}
+
+	private boolean isContaHasNoAds(List<String> items) {
+		return CollectionUtils.isEmpty(items);
 	}
 
 	private List<AdvertisementDTO> removeExistingAdvertisements(List<AdvertisementDTO> advertisementsDTOs) {
@@ -100,21 +123,27 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 	}
 
 	private List<AdvertisementDTO> createAdvertisements(List<ElegibleAdvertisementDTO> eligiblesAds,
-			List<AdvertisementItemDTO> advertisementBuyBoxes) {
+			List<AdvertisementItemDTO> advertisementBuyBoxes, MeliDTO meli) {
 		List<AdvertisementDTO> advertisements = advertisementBuyBoxes.stream()
-				.map(new AdvertisementItemDTO2ListAdvertisementDTOFunction()).flatMap(Collection::stream)
-				.collect(Collectors.toList());
+				.map(new AdvertisementItemDTO2ListAdvertisementDTOFunction()).flatMap(Collection::stream).map(item -> {
+					item.setMeliId(meli.getId());
+					return item;
+				}).collect(Collectors.toList());
 
 		advertisements = filterByEligibleAdId(eligiblesAds, advertisements);
 
-		List<BuyBoxVariationDTO> variations = eligiblesAds.stream().map(elegible -> elegible.getBuyBoxVariations())
+		List<BuyBoxVariationDTO> variations = eligiblesAds.stream().map(ElegibleAdvertisementDTO::getBuyBoxVariations)
 				.flatMap(Collection::stream).collect(Collectors.toList());
 
 		return advertisements.stream()
-				.filter(advertisement -> Objects.isNull(advertisement.getVariationId())
-						|| variations.stream().map(BuyBoxVariationDTO::getId).collect(Collectors.toList())
-								.contains(advertisement.getVariationId().toString()))
+				.filter(advertisement -> isVariationIDIsZeroOrEqualBuyBoxVariationID(advertisement, variations))
 				.collect(Collectors.toList());
+	}
+
+	private boolean isVariationIDIsZeroOrEqualBuyBoxVariationID(AdvertisementDTO advertisement,
+			List<BuyBoxVariationDTO> variations) {
+		return advertisement.getVariationId().equals(0l) || variations.stream()
+				.anyMatch(variation -> variation.getId().equals(advertisement.getVariationId().toString()));
 	}
 
 	private List<AdvertisementDTO> filterByEligibleAdId(List<ElegibleAdvertisementDTO> elegibleAds,

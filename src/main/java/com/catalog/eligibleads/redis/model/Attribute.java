@@ -2,7 +2,7 @@ package com.catalog.eligibleads.redis.model;
 
 import org.springframework.data.redis.core.RedisHash;
 
-@RedisHash("Attribute")
+@RedisHash(value = "attribute", timeToLive = 3600)
 public class Attribute {
 
 	private String id;

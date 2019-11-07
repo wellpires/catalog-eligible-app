@@ -10,7 +10,8 @@ public class Meli2MeliDTOFunction implements Function<Meli, MeliDTO> {
 
 	@Override
 	public MeliDTO apply(Meli meli) {
-		return new MeliDTOBuilder().id(meli.getId()).accessToken(meli.getAccessToken()).build();
+		return new MeliDTOBuilder().id(meli.getId()).accessToken(meli.getAccessToken())
+				.nomeConta(meli.getClienteApelido()).build();
 	}
 
 }

@@ -6,6 +6,7 @@ public class MeliDTOBuilder {
 
 	private String id;
 	private String accessToken;
+	private String nomeConta;
 
 	public MeliDTOBuilder id(String id) {
 		this.id = id;
@@ -17,10 +18,16 @@ public class MeliDTOBuilder {
 		return this;
 	}
 
+	public MeliDTOBuilder nomeConta(String clienteApelido) {
+		this.nomeConta = clienteApelido;
+		return this;
+	}
+
 	public MeliDTO build() {
 		MeliDTO meliDTO = new MeliDTO();
 		meliDTO.setId(id);
 		meliDTO.setAccessToken(accessToken);
+		meliDTO.setNomeConta(nomeConta);
 		return meliDTO;
 	}
 

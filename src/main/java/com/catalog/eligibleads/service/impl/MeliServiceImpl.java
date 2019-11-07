@@ -1,6 +1,5 @@
 package com.catalog.eligibleads.service.impl;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,10 +19,7 @@ public class MeliServiceImpl implements MeliService {
 
 	@Override
 	public List<MeliDTO> findAllActivatedMeli() {
-		return this.meliRepository.findAllById(Arrays.asList("228145111", "111412004")).stream()
-				.map(new Meli2MeliDTOFunction()).collect(Collectors.toList());
-//		return meliRepository.findByActiveIs(true).stream().map(new Meli2MeliDTOFunction())
-//				.collect(Collectors.toList());
+		return meliRepository.findByActiveTrue().stream().map(new Meli2MeliDTOFunction()).collect(Collectors.toList());
 	}
 
 }

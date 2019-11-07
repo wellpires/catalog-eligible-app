@@ -8,6 +8,6 @@ import com.catalog.eligibleads.model.Meli;
 
 public interface MeliRepository extends JpaRepository<Meli, String> {
 
-	List<Meli> findByActiveIs(boolean active);
+	List<Meli> findByActiveTrue();
 
 }

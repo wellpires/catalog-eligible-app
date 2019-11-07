@@ -4,6 +4,7 @@ public class MeliDTO {
 
 	private String id;
 	private String accessToken;
+	private String nomeConta;
 
 	public String getId() {
 		return id;
@@ -19,6 +20,14 @@ public class MeliDTO {
 
 	public void setAccessToken(String accessToken) {
 		this.accessToken = accessToken;
+	}
+
+	public void setNomeConta(String nomeConta) {
+		this.nomeConta = nomeConta;
+	}
+
+	public String getNomeConta() {
+		return nomeConta;
 	}
 
 }
