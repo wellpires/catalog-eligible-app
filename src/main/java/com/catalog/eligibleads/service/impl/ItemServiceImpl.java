@@ -43,6 +43,8 @@ public class ItemServiceImpl implements ItemService {
 		URI buscarCliente = UriComponentsBuilder.fromHttpUrl(urlSearchItems).queryParams(filterDTO.getParameters())
 				.queryParam("access_token", meli.getAccessToken()).buildAndExpand(variables).toUri();
 
+		client.getForEntity(buscarCliente, ItemsResponseDTO.class);
+
 		return client.getForEntity(buscarCliente, ItemsResponseDTO.class).getBody();
 	}
 
