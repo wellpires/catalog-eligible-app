@@ -80,7 +80,7 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 
 			FilterDTO filterDTO = new FilterDTOBuilder().accessToken(meli.getAccessToken()).limit(50l)
 					.order(Order.START_TIME_ASC).status(AdvertisementStatus.ACTIVE).build();
-
+ 
 			logger.info("{} account - Finding advertisements", meli.getNomeConta());
 			List<String> items = new ArrayList<>();
 			for (int offset = 0; offset < 1000; offset += 50) {
