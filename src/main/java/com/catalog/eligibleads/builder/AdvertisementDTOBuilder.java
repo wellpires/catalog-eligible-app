@@ -102,7 +102,7 @@ public class AdvertisementDTOBuilder {
 	}
 
 	public AdvertisementDTOBuilder variationId(Long variationId) {
-		this.variationId = variationId == 0l ? null : variationId;
+		this.variationId = variationId;
 		return this;
 	}
 

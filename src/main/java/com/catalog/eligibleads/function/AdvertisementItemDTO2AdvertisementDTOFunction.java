@@ -2,6 +2,8 @@ package com.catalog.eligibleads.function;
 
 import java.util.function.Function;
 
+import org.apache.commons.lang3.math.NumberUtils;
+
 import com.catalog.eligibleads.builder.AdvertisementDTOBuilder;
 import com.catalog.eligibleads.dto.AdvertisementDTO;
 import com.catalog.eligibleads.dto.AdvertisementItemDTO;
@@ -15,7 +17,8 @@ public class AdvertisementItemDTO2AdvertisementDTOFunction implements Function<A
 				.domainId(advertisementItemDTO.getDomainId()).image(advertisementItemDTO.getThumbnail())
 				.availableQuantity(advertisementItemDTO.getAvailableQuantity())
 				.permalink(advertisementItemDTO.getPermalink()).attributes(advertisementItemDTO.getAttributes())
-				.siteId(advertisementItemDTO.getSiteId()).status(advertisementItemDTO.getStatus()).build();
+				.siteId(advertisementItemDTO.getSiteId()).status(advertisementItemDTO.getStatus())
+				.variationId(NumberUtils.LONG_ZERO).build();
 	}
 
 }

@@ -4,7 +4,7 @@ public class MeliDTO {
 
 	private String id;
 	private String accessToken;
-	private String nomeConta;
+	private String nameAccount;
 	private Long clientId;
 	private String clientSecret;
 	private String refreshToken;
@@ -25,12 +25,12 @@ public class MeliDTO {
 		this.accessToken = accessToken;
 	}
 
-	public String getNomeConta() {
-		return nomeConta;
+	public String getNameAccount() {
+		return nameAccount;
 	}
 
-	public void setNomeConta(String nomeConta) {
-		this.nomeConta = nomeConta;
+	public void setNameAccount(String nameAccount) {
+		this.nameAccount = nameAccount;
 	}
 
 	public Long getClientId() {

@@ -4,8 +4,8 @@ public class InvalidTokenException extends Exception {
 
 	private static final long serialVersionUID = -1595014383448273753L;
 
-	public InvalidTokenException(String message) {
-		super(message);
+	public InvalidTokenException() {
+		super("Token is invalid!");
 	}
 
 }

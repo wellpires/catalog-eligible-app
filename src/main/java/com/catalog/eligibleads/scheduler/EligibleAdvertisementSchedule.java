@@ -16,14 +16,23 @@ public class EligibleAdvertisementSchedule {
 	@Autowired
 	private EligibleAdvertisementService eligibleAdvertisementService;
 
+	private boolean isFirstTimeExec = true;
+
 	@Scheduled(fixedDelayString = "${schedule.interval.one-hour}")
 	public void selectEligibleAds() {
 
-		logger.info("Eligible Ads search was started!");
+		if (isFirstTimeExec) {
+			logger.info("Eligible Ads search was started!");
+			long initialTime = System.currentTimeMillis();
 
-		this.eligibleAdvertisementService.findEligibleAds();
+			this.eligibleAdvertisementService.findEligibleAds();
 
-		logger.info("Eligible Ads search finished!");
+			long finalTime = System.currentTimeMillis();
+			logger.info("Eligible Ads search finished - {}ms", (finalTime - initialTime));
+
+			System.out.println("APAGAR ESSA PORRA");
+			isFirstTimeExec = false;
+		}
 
 	}
 

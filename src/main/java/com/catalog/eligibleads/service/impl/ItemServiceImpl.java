@@ -1,6 +1,7 @@
 package com.catalog.eligibleads.service.impl;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.catalog.eligibleads.dto.AdvertisementItemDTO;
+import com.catalog.eligibleads.dto.ElegibleAdvertisementDTO;
 import com.catalog.eligibleads.dto.FilterDTO;
 import com.catalog.eligibleads.dto.ItemResponseDTO;
 import com.catalog.eligibleads.dto.ItemsResponseDTO;
@@ -32,6 +35,8 @@ import com.catalog.eligibleads.service.TokenValidationService;
 
 @Service
 public class ItemServiceImpl implements ItemService {
+
+	private static final int LIMIT_MULTI_GET = 20;
 
 	@Value("${api.mercadolivre.users.items-search}")
 	private String urlSearchItems;
@@ -60,24 +65,35 @@ public class ItemServiceImpl implements ItemService {
 		return tryFindItems;
 	}
 
+	@Override
+	public List<AdvertisementItemDTO> searchProductsByEligibleAds(List<ElegibleAdvertisementDTO> eligibleAds,
+			MeliDTO meli) throws ExpiredTokenNotFoundException, ClientAPIErrorException, MeliNotFoundException {
+		List<AdvertisementItemDTO> advertisementBuyBoxes = new ArrayList<>();
+		for (int i = 0; i < eligibleAds.size(); i += LIMIT_MULTI_GET) {
+			String[] ids = eligibleAds.stream().skip(i).limit(LIMIT_MULTI_GET).map(ElegibleAdvertisementDTO::getId)
+					.toArray(String[]::new);
+			advertisementBuyBoxes.addAll(searchProduct(meli, ids).stream().filter(ItemResponseDTO::isSuccess)
+					.map(ItemResponseDTO::getAdvertisementItemDTO).collect(Collectors.toList()));
+		}
+		return advertisementBuyBoxes;
+	}
+
 	private ItemsResponseDTO tryFindItems(FilterDTO filterDTO, MeliDTO meli) throws InvalidAccessTokenException {
 		Map<String, Object> variables = new HashMap<String, Object>();
 		variables.put("meli_id", meli.getId());
 		URI buscarCliente = UriComponentsBuilder.fromHttpUrl(urlSearchItems).queryParams(filterDTO.getParameters())
-				.queryParam("access_token", "APP_USR-189141373421891-102620-ec4093d5f2008ccaa5f98fad3d810873-111412004")
-				.buildAndExpand(variables).toUri();
+				.queryParam("access_token", meli.getAccessToken()).buildAndExpand(variables).toUri();
 
 		ResponseEntity<ItemsResponseDTO> response = client.getForEntity(buscarCliente, ItemsResponseDTO.class);
 
 		if (HttpStatus.FORBIDDEN.equals(response.getStatusCode())
-				&& HttpStatus.UNAUTHORIZED.equals(response.getStatusCode())) {
+				|| HttpStatus.UNAUTHORIZED.equals(response.getStatusCode())) {
 			throw new InvalidAccessTokenException();
 		}
 		return response.getBody();
 	}
 
-	@Override
-	public List<ItemResponseDTO> searchProduct(MeliDTO meli, String[] ids)
+	private List<ItemResponseDTO> searchProduct(MeliDTO meli, String[] ids)
 			throws ExpiredTokenNotFoundException, ClientAPIErrorException, MeliNotFoundException {
 
 		List<ItemResponseDTO> itemsResponseDTO;
@@ -103,7 +119,7 @@ public class ItemServiceImpl implements ItemService {
 				});
 
 		if (HttpStatus.FORBIDDEN.equals(response.getStatusCode())
-				&& HttpStatus.UNAUTHORIZED.equals(response.getStatusCode())) {
+				|| HttpStatus.UNAUTHORIZED.equals(response.getStatusCode())) {
 			throw new InvalidAccessTokenException();
 		}
 

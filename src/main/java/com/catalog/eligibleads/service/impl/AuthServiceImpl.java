@@ -44,7 +44,7 @@ public class AuthServiceImpl implements AuthService {
 		AuthTokenDTO authTokenDTO = response.getBody();
 		if (HttpStatus.BAD_REQUEST.equals(response.getStatusCode())
 				|| HttpStatus.UNAUTHORIZED.equals(response.getStatusCode())) {
-			throw new InvalidTokenException("Token is invalid!");
+			throw new InvalidTokenException();
 		} else if (response.getStatusCode().series() == Series.CLIENT_ERROR
 				|| response.getStatusCode().series() == Series.SERVER_ERROR) {
 			throw new ClientAPIErrorException(authTokenDTO.getMessage());

@@ -1,5 +1,7 @@
 package com.catalog.eligibleads.builder;
 
+import java.util.Objects;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.catalog.eligibleads.dto.MeliDTO;
@@ -10,6 +12,8 @@ public class MeliDTOBuilder {
 	private String accessToken;
 	private String nomeConta;
 	private String refreshToken;
+	private Long clientId;
+	private String clientSecret;
 
 	public MeliDTOBuilder id(String id) {
 		this.id = id;
@@ -31,13 +35,25 @@ public class MeliDTOBuilder {
 		return this;
 	}
 
+	public MeliDTOBuilder clientId(Long clientId) {
+		this.clientId = clientId;
+		return this;
+	}
+
+	public MeliDTOBuilder clientSecret(String clientSecret) {
+		this.clientSecret = clientSecret;
+		return this;
+	}
+
 	public MeliDTO build() {
 
 		MeliDTO meliDTO = new MeliDTO();
 		meliDTO.setId(id);
 		meliDTO.setAccessToken(accessToken);
-		meliDTO.setNomeConta(nomeConta);
+		meliDTO.setNameAccount(nomeConta);
 		meliDTO.setRefreshToken(refreshToken);
+		meliDTO.setClientId(clientId);
+		meliDTO.setClientSecret(clientSecret);
 		return meliDTO;
 	}
 
@@ -54,6 +70,12 @@ public class MeliDTOBuilder {
 		}
 		if (StringUtils.isNotBlank(refreshToken)) {
 			meliDTO.setId(refreshToken);
+		}
+		if (Objects.nonNull(clientId)) {
+			meliDTO.setClientId(clientId);
+		}
+		if (StringUtils.isNotBlank(clientSecret)) {
+			meliDTO.setClientSecret(clientSecret);
 		}
 
 		return meliDTO;

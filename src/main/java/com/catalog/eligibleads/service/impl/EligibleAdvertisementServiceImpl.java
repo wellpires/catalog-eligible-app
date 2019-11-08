@@ -3,6 +3,9 @@ package com.catalog.eligibleads.service.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,11 +20,14 @@ import com.catalog.eligibleads.redis.model.EligibleAdvertisement;
 import com.catalog.eligibleads.redis.repository.EligibleAdsRepository;
 import com.catalog.eligibleads.service.AdvertisementService;
 import com.catalog.eligibleads.service.EligibleAdvertisementService;
+import com.catalog.eligibleads.service.MeliService;
 import com.catalog.eligibleads.util.AppUtils;
 import com.catalog.eligibleads.wrapper.AdvertisementDTOWrapper;
 
 @Service
 public class EligibleAdvertisementServiceImpl implements EligibleAdvertisementService {
+
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Autowired
 	private AdvertisementService advertisementService;
@@ -29,18 +35,28 @@ public class EligibleAdvertisementServiceImpl implements EligibleAdvertisementSe
 	@Autowired
 	private EligibleAdsRepository eligibleAdvertisementRepository;
 
+	@Autowired
+	private MeliService meliService;
+
 	@Override
 	public void findEligibleAds() {
 
-		List<AdvertisementDTO> eligibleAdvertisementsDTO = advertisementService.findAdvertisements();
+		meliService.findAllActivatedMeli().stream().map(advertisementService::findEligibleAds)
+				.filter(CollectionUtils::isNotEmpty).map(this::convertAdvertisementDTO2EligibleAdvertisement)
+				.forEach(this::saveAllEligibleAdvertisements);
 
-		List<EligibleAdvertisement> eligibleAds = eligibleAdvertisementsDTO.stream()
-				.map(new AdvertisementDTO2EligibleAdvertisementFunction())
+	}
+
+	private void saveAllEligibleAdvertisements(List<EligibleAdvertisement> eligibleAdvertisement) {
+		logger.info("Saving eligible advertisements found!");
+		this.eligibleAdvertisementRepository.saveAll(eligibleAdvertisement);
+	}
+
+	private List<EligibleAdvertisement> convertAdvertisementDTO2EligibleAdvertisement(
+			List<AdvertisementDTO> eligibleAdvertisementsDTO) {
+		return eligibleAdvertisementsDTO.stream().map(new AdvertisementDTO2EligibleAdvertisementFunction())
 				.filter(AppUtils.distinctByKeys(EligibleAdvertisement::getMlbId, EligibleAdvertisement::getVariationId))
 				.collect(Collectors.toList());
-
-		this.eligibleAdvertisementRepository.saveAll(eligibleAds);
-
 	}
 
 	@Override

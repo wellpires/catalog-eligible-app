@@ -24,6 +24,12 @@ public class Meli implements Serializable {
 	@Column(name = "refreshtoken")
 	private String refreshToken;
 
+	@Column(name = "clientid")
+	private Long clientId;
+
+	@Column(name = "clientsecret")
+	private String clientSecret;
+
 	public String getId() {
 		return id;
 	}
@@ -56,12 +62,28 @@ public class Meli implements Serializable {
 		this.active = active;
 	}
 
+	public String getRefreshToken() {
+		return refreshToken;
+	}
+
 	public void setRefreshToken(String refreshToken) {
 		this.refreshToken = refreshToken;
 	}
 
-	public String getRefreshToken() {
-		return refreshToken;
+	public Long getClientId() {
+		return clientId;
+	}
+
+	public void setClientId(Long clientId) {
+		this.clientId = clientId;
+	}
+
+	public String getClientSecret() {
+		return clientSecret;
+	}
+
+	public void setClientSecret(String clientSecret) {
+		this.clientSecret = clientSecret;
 	}
 
 }
