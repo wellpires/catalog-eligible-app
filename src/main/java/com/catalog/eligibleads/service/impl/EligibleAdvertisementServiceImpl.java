@@ -41,7 +41,7 @@ public class EligibleAdvertisementServiceImpl implements EligibleAdvertisementSe
 	@Override
 	public void findEligibleAds() {
 
-		meliService.findAllActivatedMeli().stream().map(advertisementService::findEligibleAds)
+		meliService.findAllActivatedMeli().parallelStream().map(advertisementService::findEligibleAds)
 				.filter(CollectionUtils::isNotEmpty).map(this::convertAdvertisementDTO2EligibleAdvertisement)
 				.forEach(this::saveAllEligibleAdvertisements);
 

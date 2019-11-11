@@ -92,7 +92,7 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 			}
 
 			logger.info("{} account - Finding eligible advertisements", meli.getNameAccount());
-			List<ElegibleAdvertisementDTO> eligiblesAds = findEachEligibleAds(items, meli);
+			List<ElegibleAdvertisementDTO> eligiblesAds = findEligibleAdvertisement(items, meli);
 
 			if (isContaHasNoEligibleAds(eligiblesAds)) {
 				logger.warn("{} account has no eligible advertisements", meli.getNameAccount());
@@ -169,8 +169,8 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 				.anyMatch(eligibleAd -> advertisement.getId().equals(eligibleAd))).collect(Collectors.toList());
 	}
 
-	private List<ElegibleAdvertisementDTO> findEachEligibleAds(List<String> items, MeliDTO meli) {
-		return items.stream().map(this::setParameter).map(item -> {
+	private List<ElegibleAdvertisementDTO> findEligibleAdvertisement(List<String> items, MeliDTO meli) {
+		return items.parallelStream().map(this::setParameter).map(item -> {
 			try {
 				return configClient(item, meli);
 			} catch (ExpiredTokenNotFoundException | ClientAPIErrorException | MeliNotFoundException e) {

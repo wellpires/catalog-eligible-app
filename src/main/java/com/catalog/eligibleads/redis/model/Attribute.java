@@ -1,9 +1,13 @@
 package com.catalog.eligibleads.redis.model;
 
+import java.io.Serializable;
+
 import org.springframework.data.redis.core.RedisHash;
 
-@RedisHash(value = "attribute", timeToLive = 3600)
-public class Attribute {
+@RedisHash(value = "attribute", timeToLive = 21600)
+public class Attribute implements Serializable {
+
+	private static final long serialVersionUID = 8039459337476742529L;
 
 	private String id;
 	private String name;

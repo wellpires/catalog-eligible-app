@@ -11,7 +11,7 @@ import org.springframework.data.annotation.Reference;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.index.Indexed;
 
-@RedisHash(value = "eligibleAd", timeToLive = 3600)
+@RedisHash(value = "eligibleAd", timeToLive = 21600)
 public class EligibleAdvertisement implements Serializable {
 
 	private static final long serialVersionUID = -2795955666775572028L;
