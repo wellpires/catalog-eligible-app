@@ -1,6 +1,9 @@
 package com.catalog.eligibleads.builder;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -10,10 +13,12 @@ public class MeliDTOBuilder {
 
 	private String id;
 	private String accessToken;
-	private String nomeConta;
+	private String nameAccount;
 	private String refreshToken;
 	private Long clientId;
 	private String clientSecret;
+	private int itemsAmount;
+	private boolean allowNull;
 
 	public MeliDTOBuilder id(String id) {
 		this.id = id;
@@ -25,8 +30,8 @@ public class MeliDTOBuilder {
 		return this;
 	}
 
-	public MeliDTOBuilder nomeConta(String clienteApelido) {
-		this.nomeConta = clienteApelido;
+	public MeliDTOBuilder nameAccount(String nameAccount) {
+		this.nameAccount = nameAccount;
 		return this;
 	}
 
@@ -45,12 +50,23 @@ public class MeliDTOBuilder {
 		return this;
 	}
 
+	public MeliDTOBuilder itemsAmount(int itemsAmount) {
+		this.itemsAmount = itemsAmount;
+		return this;
+	}
+
+	public MeliDTOBuilder refreshToken(String refreshToken, boolean allowNull) {
+		this.refreshToken = refreshToken;
+		this.allowNull = allowNull;
+		return this;
+	}
+
 	public MeliDTO build() {
 
 		MeliDTO meliDTO = new MeliDTO();
 		meliDTO.setId(id);
 		meliDTO.setAccessToken(accessToken);
-		meliDTO.setNameAccount(nomeConta);
+		meliDTO.setNameAccount(nameAccount);
 		meliDTO.setRefreshToken(refreshToken);
 		meliDTO.setClientId(clientId);
 		meliDTO.setClientSecret(clientSecret);
@@ -63,13 +79,13 @@ public class MeliDTOBuilder {
 			meliDTO.setId(id);
 		}
 		if (StringUtils.isNotBlank(accessToken)) {
-			meliDTO.setId(accessToken);
+			meliDTO.setAccessToken(accessToken);
 		}
-		if (StringUtils.isNotBlank(nomeConta)) {
-			meliDTO.setId(nomeConta);
+		if (StringUtils.isNotBlank(nameAccount)) {
+			meliDTO.setNameAccount(nameAccount);
 		}
-		if (StringUtils.isNotBlank(refreshToken)) {
-			meliDTO.setId(refreshToken);
+		if (StringUtils.isNotBlank(refreshToken) || allowNull) {
+			meliDTO.setRefreshToken(refreshToken);
 		}
 		if (Objects.nonNull(clientId)) {
 			meliDTO.setClientId(clientId);
@@ -79,6 +95,19 @@ public class MeliDTOBuilder {
 		}
 
 		return meliDTO;
+	}
+
+	public List<MeliDTO> buildList() {
+		return IntStream.range(0, itemsAmount).mapToObj(index -> {
+			MeliDTO meliDTO = new MeliDTO();
+			meliDTO.setId(id);
+			meliDTO.setAccessToken(accessToken);
+			meliDTO.setNameAccount(nameAccount);
+			meliDTO.setRefreshToken(refreshToken);
+			meliDTO.setClientId(clientId);
+			meliDTO.setClientSecret(clientSecret);
+			return meliDTO;
+		}).collect(Collectors.toList());
 	}
 
 }

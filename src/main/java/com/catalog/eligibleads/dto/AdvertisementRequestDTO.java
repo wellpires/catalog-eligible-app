@@ -5,7 +5,6 @@ import java.util.Objects;
 public class AdvertisementRequestDTO {
 
 	private String meliId;
-	private String accessToken;
 	private PagingDTO paging;
 
 	public String getMeliId() {
@@ -14,14 +13,6 @@ public class AdvertisementRequestDTO {
 
 	public void setMeliId(String meliId) {
 		this.meliId = meliId;
-	}
-
-	public String getAccessToken() {
-		return accessToken;
-	}
-
-	public void setAccessToken(String accessToken) {
-		this.accessToken = accessToken;
 	}
 
 	public PagingDTO getPaging() {

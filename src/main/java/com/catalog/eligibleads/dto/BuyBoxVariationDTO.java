@@ -3,8 +3,10 @@ package com.catalog.eligibleads.dto;
 import java.util.Objects;
 
 import com.catalog.eligibleads.enums.BuyBoxStatus;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class BuyBoxVariationDTO {
 
 	private String id;
@@ -40,5 +42,5 @@ public class BuyBoxVariationDTO {
 	public boolean isElegible() {
 		return Objects.nonNull(buyBoxElegible) && buyBoxElegible && Objects.nonNull(status) && status.isReadyForOptin();
 	}
-	
+
 }

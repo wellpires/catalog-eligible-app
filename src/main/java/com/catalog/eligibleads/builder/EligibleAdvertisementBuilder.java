@@ -31,6 +31,7 @@ public class EligibleAdvertisementBuilder {
 	private String model;
 	private String productIdentifier;
 	private String meliId;
+	private String accountName;
 
 	public EligibleAdvertisementBuilder id(Long id) {
 		this.id = id;
@@ -103,7 +104,7 @@ public class EligibleAdvertisementBuilder {
 	}
 
 	public EligibleAdvertisementBuilder variationId(Long variationId) {
-		this.variationId = variationId == 0 ? null : variationId;
+		this.variationId = variationId;
 		return this;
 	}
 
@@ -132,6 +133,11 @@ public class EligibleAdvertisementBuilder {
 		return this;
 	}
 
+	public EligibleAdvertisementBuilder accountName(String accountName) {
+		this.accountName = accountName;
+		return this;
+	}
+
 	public EligibleAdvertisement build() {
 		EligibleAdvertisement eligibleAdvertisement = new EligibleAdvertisement();
 		eligibleAdvertisement.setId(id);
@@ -153,6 +159,7 @@ public class EligibleAdvertisementBuilder {
 		eligibleAdvertisement.setModel(model);
 		eligibleAdvertisement.setProductIdentifier(productIdentifier);
 		eligibleAdvertisement.setMeliId(meliId);
+		eligibleAdvertisement.setAccountName(accountName);
 
 		return eligibleAdvertisement;
 	}
@@ -161,9 +168,10 @@ public class EligibleAdvertisementBuilder {
 		List<EligibleAdvertisement> advertisements = new ArrayList<>();
 
 		for (int i = 0; i < itemsAmount; i++) {
-			EligibleAdvertisement EligibleAdvertisement = new EligibleAdvertisement();
-			EligibleAdvertisement.setId(RandomUtils.nextLong(0, 1000));
-			advertisements.add(EligibleAdvertisement);
+			EligibleAdvertisement eligibleAdvertisement = new EligibleAdvertisement();
+			eligibleAdvertisement.setId(RandomUtils.nextLong(0, 1000));
+			eligibleAdvertisement.setAttributes(attributes);
+			advertisements.add(eligibleAdvertisement);
 		}
 
 		return advertisements;

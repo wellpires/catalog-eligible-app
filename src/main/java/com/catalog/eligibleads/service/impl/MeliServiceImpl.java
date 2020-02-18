@@ -29,7 +29,7 @@ public class MeliServiceImpl implements MeliService {
 		Meli meli = meliRepository.findById(meliDTOModified.getId()).orElseThrow(MeliNotFoundException::new);
 		meli.setAccessToken(meliDTOModified.getAccessToken());
 		meli.setRefreshToken(meliDTOModified.getRefreshToken());
-		meliRepository.flush();
+		meliRepository.saveAndFlush(meli);
 	}
 
 }

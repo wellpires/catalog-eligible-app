@@ -9,12 +9,13 @@ import com.catalog.eligibleads.dto.ItemsResponseDTO;
 import com.catalog.eligibleads.dto.MeliDTO;
 import com.catalog.eligibleads.exception.ClientAPIErrorException;
 import com.catalog.eligibleads.exception.ExpiredTokenNotFoundException;
+import com.catalog.eligibleads.exception.InvalidAccessTokenException;
 import com.catalog.eligibleads.exception.MeliNotFoundException;
 
 public interface ItemService {
 
 	ItemsResponseDTO findItems(FilterDTO filterDTO, MeliDTO meli)
-			throws ExpiredTokenNotFoundException, ClientAPIErrorException, MeliNotFoundException;
+			throws ExpiredTokenNotFoundException, ClientAPIErrorException, MeliNotFoundException, InvalidAccessTokenException;
 
 	List<AdvertisementItemDTO> searchProductsByEligibleAds(List<ElegibleAdvertisementDTO> eligiblesAds, MeliDTO meli)
 			throws ExpiredTokenNotFoundException, ClientAPIErrorException, MeliNotFoundException;

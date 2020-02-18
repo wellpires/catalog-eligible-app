@@ -3,21 +3,25 @@ package com.catalog.eligibleads.redis.model;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Objects;
 
 import javax.persistence.Id;
+import javax.persistence.Transient;
 
 import org.springframework.data.annotation.Reference;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.index.Indexed;
 
-@RedisHash(value = "eligibleAd", timeToLive = 21600)
+@RedisHash(value = "eligibleAd")
 public class EligibleAdvertisement implements Serializable {
 
 	private static final long serialVersionUID = -2795955666775572028L;
 
 	@Id
 	private Long id;
+	@Reference
+	private List<Attribute> attributes;
+	@Indexed
+	private String meliId;
 	private String title;
 	private String subtitle;
 	private BigDecimal price;
@@ -31,15 +35,12 @@ public class EligibleAdvertisement implements Serializable {
 	private String productIdentifier;
 	private String status;
 	private Long availableQuantity;
-	@Reference
-	private List<Attribute> attributes;
-	@Indexed
 	private Long variationId;
 	private String permalink;
-	@Indexed
-	private String meliId;
-	@Indexed
 	private String mlbId;
+
+	@Transient
+	private String accountName;
 
 	public Long getId() {
 		return id;
@@ -47,6 +48,22 @@ public class EligibleAdvertisement implements Serializable {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public List<Attribute> getAttributes() {
+		return attributes;
+	}
+
+	public void setAttributes(List<Attribute> attributes) {
+		this.attributes = attributes;
+	}
+
+	public String getMeliId() {
+		return meliId;
+	}
+
+	public void setMeliId(String meliId) {
+		this.meliId = meliId;
 	}
 
 	public String getTitle() {
@@ -153,14 +170,6 @@ public class EligibleAdvertisement implements Serializable {
 		this.availableQuantity = availableQuantity;
 	}
 
-	public List<Attribute> getAttributes() {
-		return attributes;
-	}
-
-	public void setAttributes(List<Attribute> attributes) {
-		this.attributes = attributes;
-	}
-
 	public Long getVariationId() {
 		return variationId;
 	}
@@ -177,36 +186,20 @@ public class EligibleAdvertisement implements Serializable {
 		this.permalink = permalink;
 	}
 
-	public String getMeliId() {
-		return meliId;
-	}
-
-	public void setMeliId(String meliId) {
-		this.meliId = meliId;
+	public String getMlbId() {
+		return mlbId;
 	}
 
 	public void setMlbId(String mlbId) {
 		this.mlbId = mlbId;
 	}
 
-	public String getMlbId() {
-		return mlbId;
+	public String getAccountName() {
+		return accountName;
 	}
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(meliId, mlbId, variationId);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!(obj instanceof EligibleAdvertisement))
-			return false;
-		EligibleAdvertisement other = (EligibleAdvertisement) obj;
-		return Objects.equals(meliId, other.meliId) && Objects.equals(mlbId, other.mlbId)
-				&& Objects.equals(variationId, other.variationId);
+	public void setAccountName(String accountName) {
+		this.accountName = accountName;
 	}
 
 }

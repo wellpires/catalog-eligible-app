@@ -17,7 +17,7 @@ import com.catalog.eligibleads.service.EligibleAdvertisementService;
 import com.catalog.eligibleads.wrapper.AdvertisementDTOWrapper;
 
 @RestController
-@RequestMapping("buybox/eligible")
+@RequestMapping("v1/catalog/eligibles")
 public class EligibleAdvertisementController implements EligibleAdvertisementResource {
 
 	@Autowired
@@ -26,11 +26,10 @@ public class EligibleAdvertisementController implements EligibleAdvertisementRes
 	@Override
 	@GetMapping(path = "/{meliId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<EligibleAdvertisementsResponse> findEligibleAds(@PathVariable("meliId") String meliId,
-			@RequestParam("access_token") String accessToken, @RequestParam("limit") Long limit,
-			@RequestParam("page") Long page) {
+			@RequestParam("limit") Long limit, @RequestParam("page") Long page) {
 
 		AdvertisementRequestDTO advertisementRequestDTO = new AdvertisementRequestDTOBuilder().meliId(meliId)
-				.accessToken(accessToken).pageLimit(limit).pageNumber(page).build();
+				.pageLimit(limit).pageNumber(page).build();
 
 		AdvertisementDTOWrapper advertisements = this.eligibleAdvertisementService
 				.findAdvertisements(advertisementRequestDTO);

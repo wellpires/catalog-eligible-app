@@ -36,16 +36,12 @@ public class TokenValidationServiceImpl implements TokenValidationService {
 	@Override
 	public MeliDTO refreshToken(MeliDTO meli)
 			throws ExpiredTokenNotFoundException, ClientAPIErrorException, MeliNotFoundException {
-		
-		if("1".equals("1")) {
-			throw new ClientAPIErrorException("APAGAR");
-		}
 
 		try {
 			AuthTokenDTO authTokenDTO = this.authService.findToken(meli);
 
 			MeliDTO meliDTO = new MeliDTOBuilder()
-					.refreshToken(Optional.ofNullable(authTokenDTO.getRefreshToken()).orElseGet(() -> null))
+					.refreshToken(Optional.ofNullable(authTokenDTO.getRefreshToken()).orElseGet(() -> null), true)
 					.accessToken(
 							Optional.ofNullable(authTokenDTO.getAccessToken()).orElseGet(() -> meli.getAccessToken()))
 					.modify(meli);

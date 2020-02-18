@@ -1,6 +1,7 @@
 package com.catalog.eligibleads.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,8 @@ public class AuthServiceImpl implements AuthService {
 	@Autowired
 	private RestTemplate client;
 
-	private String urlRefreshToken = "https://api.mercadolibre.com/oauth/token";
+	@Value("${api.mercadolivre.oauth.token}")
+	private String urlRefreshToken;
 
 	@Override
 	public AuthTokenDTO findToken(MeliDTO meli) throws InvalidTokenException, ClientAPIErrorException {

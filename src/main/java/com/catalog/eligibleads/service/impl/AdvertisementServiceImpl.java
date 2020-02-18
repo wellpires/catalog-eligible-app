@@ -7,11 +7,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,13 +35,19 @@ import com.catalog.eligibleads.exception.ExpiredTokenNotFoundException;
 import com.catalog.eligibleads.exception.InvalidAccessTokenException;
 import com.catalog.eligibleads.exception.MeliNotFoundException;
 import com.catalog.eligibleads.function.AdvertisementItemDTO2ListAdvertisementDTOFunction;
-import com.catalog.eligibleads.redis.repository.EligibleAdsRepository;
 import com.catalog.eligibleads.service.AdvertisementService;
 import com.catalog.eligibleads.service.ItemService;
+import com.catalog.eligibleads.service.MeliAccountService;
 import com.catalog.eligibleads.service.TokenValidationService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class AdvertisementServiceImpl implements AdvertisementService {
+
+	private static final int ITEMS_LIMIT_OFFSET = 1000;
+
+	private static final int ITEMS_OFFSET = 50;
 
 	private static final Logger logger = LoggerFactory.getLogger(AdvertisementServiceImpl.class);
 
@@ -54,32 +58,30 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 	private ItemService itemService;
 
 	@Autowired
-	private EligibleAdsRepository eligibleAdvertisementRepository;
+	private TokenValidationService tokenValidationService;
 
 	@Autowired
-	private TokenValidationService tokenValidationService;
+	private MeliAccountService meliAccountService;
 
 	@Value("${api.mercadolivre.items.catalog-listing-eligibility}")
 	private String urlEligibleAds;
+
+	@Autowired
+	private ObjectMapper mapper;
 
 	@Override
 	public List<AdvertisementDTO> findEligibleAds(MeliDTO meli) {
 
 		List<AdvertisementDTO> advertisementsDTOs = Collections.emptyList();
 		try {
-			logger.info(" >>>>>>>>>>>> Finding eligible advertisements for {} account <<<<<<<<<<<<",
-					meli.getNameAccount());
-
 			FilterDTO filterDTO = new FilterDTOBuilder().accessToken(meli.getAccessToken()).limit(50l)
 					.order(Order.START_TIME_ASC).status(AdvertisementStatus.ACTIVE).build();
 
-			logger.info("{} account - Finding advertisements", meli.getNameAccount());
 			List<String> items = new ArrayList<>();
-			for (int offset = 0; offset < 1000; offset += 50) {
+			for (int offset = 0; offset <= ITEMS_LIMIT_OFFSET; offset += ITEMS_OFFSET) {
 				filterDTO.setOffset(offset);
-				ItemsResponseDTO itemsResponse;
-				itemsResponse = itemService.findItems(filterDTO, meli);
 
+				ItemsResponseDTO itemsResponse = itemService.findItems(filterDTO, meli);
 				if (CollectionUtils.isEmpty(itemsResponse.getItems())) {
 					break;
 				}
@@ -88,32 +90,30 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 
 			if (isContaHasNoAds(items)) {
 				logger.warn("{} account has no advertisements", meli.getNameAccount());
+				meliAccountService.saveMeliAccount(meli);
 				return Collections.emptyList();
 			}
 
-			logger.info("{} account - Finding eligible advertisements", meli.getNameAccount());
 			List<ElegibleAdvertisementDTO> eligiblesAds = findEligibleAdvertisement(items, meli);
 
 			if (isContaHasNoEligibleAds(eligiblesAds)) {
 				logger.warn("{} account has no eligible advertisements", meli.getNameAccount());
+				meliAccountService.saveMeliAccount(meli);
 				return Collections.emptyList();
 			}
 
-			logger.info("{} account - Finding eligible advertisements", meli.getNameAccount());
 			List<AdvertisementItemDTO> advertisementBuyBoxes = itemService.searchProductsByEligibleAds(eligiblesAds,
 					meli);
 
-			advertisementsDTOs = createAdvertisements(eligiblesAds, advertisementBuyBoxes, meli);
+			return createAdvertisements(eligiblesAds, advertisementBuyBoxes, meli);
 
-			logger.info("{} account - Removing eligible advertisements that already exists in database",
-					meli.getNameAccount());
-			return removeExistingAdvertisements(advertisementsDTOs);
-
-		} catch (ExpiredTokenNotFoundException | ClientAPIErrorException | MeliNotFoundException e) {
+		} catch (MeliNotFoundException | ExpiredTokenNotFoundException | ClientAPIErrorException ex) {
+			logger.error(ex.getMessage());
+		} catch (InvalidAccessTokenException ex) {
+			logger.warn(ex.getMessage());
+		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
-
-		logger.info(" ======================================================================== ");
 
 		return advertisementsDTOs;
 	}
@@ -126,22 +126,12 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 		return CollectionUtils.isEmpty(items);
 	}
 
-	private List<AdvertisementDTO> removeExistingAdvertisements(List<AdvertisementDTO> advertisementsDTOs) {
-		return advertisementsDTOs.stream().filter(ad -> advertisementsDTOs.stream().noneMatch(this::isRegisterExists))
-				.collect(Collectors.toList());
-	}
-
-	private boolean isRegisterExists(AdvertisementDTO adDTO) {
-		return eligibleAdvertisementRepository
-				.findByVariationIdAndMeliIdAndMlbId(adDTO.getVariationId(), adDTO.getMeliId(), adDTO.getId())
-				.isPresent();
-	}
-
 	private List<AdvertisementDTO> createAdvertisements(List<ElegibleAdvertisementDTO> eligiblesAds,
 			List<AdvertisementItemDTO> advertisementBuyBoxes, MeliDTO meli) {
 		List<AdvertisementDTO> advertisements = advertisementBuyBoxes.stream()
 				.map(new AdvertisementItemDTO2ListAdvertisementDTOFunction()).flatMap(Collection::stream).map(item -> {
 					item.setMeliId(meli.getId());
+					item.setAccountName(meli.getNameAccount());
 					return item;
 				}).collect(Collectors.toList());
 
@@ -158,9 +148,8 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 	private boolean isVariationIDIsZeroOrEqualBuyBoxVariationID(AdvertisementDTO advertisement,
 			List<BuyBoxVariationDTO> variations) {
 
-		return NumberUtils.LONG_ZERO.equals(advertisement.getVariationId()) || variations.stream()
-				.anyMatch(variation -> variation.getId().equals(Optional.ofNullable(advertisement.getVariationId())
-						.map(Objects::toString).orElseGet(() -> NumberUtils.LONG_ZERO.toString())));
+		return Objects.isNull(advertisement.getVariationId()) || variations.stream()
+				.anyMatch(variation -> variation.getId().equals(String.valueOf(advertisement.getVariationId())));
 	}
 
 	private List<AdvertisementDTO> filterByEligibleAdId(List<ElegibleAdvertisementDTO> elegibleAds,
@@ -173,7 +162,8 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 		return items.parallelStream().map(this::setParameter).map(item -> {
 			try {
 				return configClient(item, meli);
-			} catch (ExpiredTokenNotFoundException | ClientAPIErrorException | MeliNotFoundException e) {
+			} catch (ExpiredTokenNotFoundException | ClientAPIErrorException | MeliNotFoundException
+					| InvalidAccessTokenException e) {
 				throw new RuntimeException(e);
 			}
 		}).map(ElegibleAdvertisementDTO::selectElegibles).flatMap(Collection::stream).collect(Collectors.toList());
@@ -195,14 +185,23 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 		URI findEligibleAd = UriComponentsBuilder.fromHttpUrl(urlEligibleAds)
 				.queryParam("access_token", meli.getAccessToken()).buildAndExpand(parameter).toUri();
 
-		ResponseEntity<ElegibleAdvertisementDTO> response = client.getForEntity(findEligibleAd,
-				ElegibleAdvertisementDTO.class);
+		ResponseEntity<String> response = client.getForEntity(findEligibleAd, String.class);
 		if (HttpStatus.FORBIDDEN.equals(response.getStatusCode())
-				&& HttpStatus.UNAUTHORIZED.equals(response.getStatusCode())) {
-			throw new InvalidAccessTokenException();
+				|| HttpStatus.UNAUTHORIZED.equals(response.getStatusCode())) {
+			throw new InvalidAccessTokenException(meli.getNameAccount());
 		}
 
-		return response.getBody();
+		ElegibleAdvertisementDTO elegibleAdvertisementDTO = new ElegibleAdvertisementDTO();
+		if (response.getStatusCode().is2xxSuccessful()) {
+			try {
+				elegibleAdvertisementDTO = mapper.readValue(response.getBody(), ElegibleAdvertisementDTO.class);
+			} catch (JsonProcessingException e) {
+				logger.error("Error parsing JSON - Account {}", meli.getNameAccount());
+				logger.error(e.getMessage(), e);
+			}
+		}
+
+		return elegibleAdvertisementDTO;
 	}
 
 	private Map<String, String> setParameter(String itemId) {

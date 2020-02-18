@@ -55,6 +55,7 @@ public class ElegibleAdvertisementDTOBuilder {
 		elegibleAdvertisementDTO.setId(id);
 		elegibleAdvertisementDTO.setStatus(status);
 		elegibleAdvertisementDTO.setBuyBoxElegible(buyBoxElegible);
+		elegibleAdvertisementDTO.setBuyBoxVariations(buyBoxVariations);
 		return elegibleAdvertisementDTO;
 	}
 

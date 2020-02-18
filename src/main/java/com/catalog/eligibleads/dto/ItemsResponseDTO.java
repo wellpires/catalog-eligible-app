@@ -3,8 +3,10 @@ package com.catalog.eligibleads.dto;
 import java.util.List;
 
 import com.catalog.eligibleads.dto.PagingDTO;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ItemsResponseDTO {
 
 	private PagingDTO paging;

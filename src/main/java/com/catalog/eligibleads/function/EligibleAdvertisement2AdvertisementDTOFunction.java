@@ -1,8 +1,11 @@
 package com.catalog.eligibleads.function;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.apache.commons.collections.CollectionUtils;
 
 import com.catalog.eligibleads.builder.AdvertisementDTOBuilder;
 import com.catalog.eligibleads.dto.AdvertisementDTO;
@@ -14,8 +17,12 @@ public class EligibleAdvertisement2AdvertisementDTOFunction
 
 	@Override
 	public AdvertisementDTO apply(EligibleAdvertisement eligibleAdvertisement) {
-		List<AttributeDTO> attributes = eligibleAdvertisement.getAttributes().stream()
-				.map(new Attribute2AttributeDTOFunction()).collect(Collectors.toList());
+
+		List<AttributeDTO> attributes = new ArrayList<>();
+		if (CollectionUtils.isNotEmpty(eligibleAdvertisement.getAttributes())) {
+			attributes = eligibleAdvertisement.getAttributes().stream().map(new Attribute2AttributeDTOFunction())
+					.collect(Collectors.toList());
+		}
 
 		return new AdvertisementDTOBuilder().id(eligibleAdvertisement.getMlbId())
 				.title(eligibleAdvertisement.getTitle()).subtitle(eligibleAdvertisement.getSubtitle())

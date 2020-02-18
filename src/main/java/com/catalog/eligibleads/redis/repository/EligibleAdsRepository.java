@@ -1,6 +1,6 @@
 package com.catalog.eligibleads.redis.repository;
 
-import java.util.Optional;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +14,6 @@ public interface EligibleAdsRepository extends CrudRepository<EligibleAdvertisem
 
 	Page<EligibleAdvertisement> findByMeliId(String meliId, Pageable pageable);
 
-	Optional<EligibleAdvertisement> findByVariationIdAndMeliIdAndMlbId(Long variationId, String meliId, String mlbId);
+	List<EligibleAdvertisement> findByMeliId(String meliId);
 
 }

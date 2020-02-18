@@ -10,9 +10,17 @@ public class EligibleAdvertisementsResponse {
 
 	private List<AdvertisementDTO> advertisements;
 
+	public EligibleAdvertisementsResponse() {
+	}
+
 	public EligibleAdvertisementsResponse(List<AdvertisementDTO> advertisements, Long totalItems) {
 		this.advertisements = advertisements;
 		this.totalItems = totalItems;
+	}
+
+	public EligibleAdvertisementsResponse(List<AdvertisementDTO> advertisements, Integer totalItems) {
+		this.advertisements = advertisements;
+		this.totalItems = totalItems.longValue();
 	}
 
 	public Long getTotalItems() {

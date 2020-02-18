@@ -5,16 +5,21 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AdvertisementVariationDTO {
 
 	private Long id;
 	private String name;
+	
 	@JsonProperty("attribute_combinations")
 	private Set<ItemAttributeDTO> attributes;
+	
 	@JsonProperty("seller_custom_field")
 	private String sellerCustomField;
+	
 	@JsonProperty("picture_ids")
 	private List<String> pictureIds;
 

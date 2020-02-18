@@ -2,8 +2,10 @@ package com.catalog.eligibleads.dto;
 
 import org.springframework.http.HttpStatus;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ItemResponseDTO {
 
 	private Integer code;

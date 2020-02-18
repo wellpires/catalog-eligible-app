@@ -23,6 +23,7 @@ public class AdvertisementDTO {
 	private Long variationId;
 	private String permalink;
 	private String meliId;
+	private String accountName;
 
 	public String getStatus() {
 		return status;
@@ -166,6 +167,14 @@ public class AdvertisementDTO {
 
 	public void setMeliId(String meliId) {
 		this.meliId = meliId;
+	}
+
+	public void setAccountName(String accountName) {
+		this.accountName = accountName;
+	}
+
+	public String getAccountName() {
+		return accountName;
 	}
 
 }

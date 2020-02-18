@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 import com.catalog.eligibleads.builder.AdvertisementDTOWrapperBuilder;
@@ -20,6 +22,7 @@ import com.catalog.eligibleads.redis.model.EligibleAdvertisement;
 import com.catalog.eligibleads.redis.repository.EligibleAdsRepository;
 import com.catalog.eligibleads.service.AdvertisementService;
 import com.catalog.eligibleads.service.EligibleAdvertisementService;
+import com.catalog.eligibleads.service.MeliAccountService;
 import com.catalog.eligibleads.service.MeliService;
 import com.catalog.eligibleads.util.AppUtils;
 import com.catalog.eligibleads.wrapper.AdvertisementDTOWrapper;
@@ -38,17 +41,24 @@ public class EligibleAdvertisementServiceImpl implements EligibleAdvertisementSe
 	@Autowired
 	private MeliService meliService;
 
+	@Autowired
+	private MeliAccountService meliAccountService;
+
 	@Override
 	public void findEligibleAds() {
 
-		meliService.findAllActivatedMeli().parallelStream().map(advertisementService::findEligibleAds)
-				.filter(CollectionUtils::isNotEmpty).map(this::convertAdvertisementDTO2EligibleAdvertisement)
-				.forEach(this::saveAllEligibleAdvertisements);
+		meliService.findAllActivatedMeli().parallelStream().filter(meliAccountService::meliAccountProbablyHasNoAds)
+				.map(advertisementService::findEligibleAds).filter(CollectionUtils::isNotEmpty)
+				.map(this::convertAdvertisementDTO2EligibleAdvertisement).forEach(this::saveAllEligibleAdvertisements);
 
 	}
 
 	private void saveAllEligibleAdvertisements(List<EligibleAdvertisement> eligibleAdvertisement) {
-		logger.info("Saving eligible advertisements found!");
+		logger.info("Saving the total of {} eligible ads to {} account", eligibleAdvertisement.size(),
+				eligibleAdvertisement.stream().findFirst().get().getAccountName());
+
+		eligibleAdvertisement.stream().map(EligibleAdvertisement::getMeliId)
+				.map(eligibleAdvertisementRepository::findByMeliId).forEach(eligibleAdvertisementRepository::deleteAll);
 		this.eligibleAdvertisementRepository.saveAll(eligibleAdvertisement);
 	}
 
@@ -63,7 +73,7 @@ public class EligibleAdvertisementServiceImpl implements EligibleAdvertisementSe
 	public AdvertisementDTOWrapper findAdvertisements(AdvertisementRequestDTO advertisementRequestDTO) {
 
 		PageRequest paging = PageRequest.of(advertisementRequestDTO.getPageNumber(),
-				advertisementRequestDTO.getPageLimit());
+				advertisementRequestDTO.getPageLimit(), Sort.by(Direction.ASC, "meliId"));
 
 		Page<EligibleAdvertisement> pageResult = eligibleAdvertisementRepository
 				.findByMeliId(advertisementRequestDTO.getMeliId(), paging);

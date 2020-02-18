@@ -26,7 +26,8 @@ public class AdvertisementDTO2EligibleAdvertisementFunction
 				.variationName(advertisementDTO.getVariationName()).variationSKU(advertisementDTO.getVariationSKU())
 				.brand(advertisementDTO.getBrand()).model(advertisementDTO.getModel())
 				.productIdentifier(advertisementDTO.getProductIdentifier())
-				.variationId(advertisementDTO.getVariationId()).meliId(advertisementDTO.getMeliId()).build();
+				.variationId(advertisementDTO.getVariationId()).meliId(advertisementDTO.getMeliId())
+				.accountName(advertisementDTO.getAccountName()).build();
 	}
 
 }

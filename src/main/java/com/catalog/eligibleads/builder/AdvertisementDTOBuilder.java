@@ -161,6 +161,7 @@ public class AdvertisementDTOBuilder {
 		for (int i = 0; i < itemsAmount; i++) {
 			AdvertisementDTO advertisementDTO = new AdvertisementDTO();
 			advertisementDTO.setId(RandomStringUtils.randomAlphanumeric(10));
+			advertisementDTO.setAttributes(attributes);
 			advertisements.add(advertisementDTO);
 		}
 

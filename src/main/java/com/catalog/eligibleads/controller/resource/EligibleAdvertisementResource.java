@@ -21,7 +21,6 @@ public interface EligibleAdvertisementResource {
 			@ApiResponse(code = 500, message = "General exception happened", response = ErrorResponse.class) })
 	public ResponseEntity<EligibleAdvertisementsResponse> findEligibleAds(
 			@ApiParam(name = "meliId", value = "Meli ID to find the eligible advertisements", required = true) String meliId,
-			@ApiParam(name = "access_token", value = "Token to access Mercado Livre APIs", required = true) String accessToken,
 			@ApiParam(name = "limit", value = "Limit of the page", required = true) Long limit,
 			@ApiParam(name = "page", value = "Page number", required = true) Long page);
 

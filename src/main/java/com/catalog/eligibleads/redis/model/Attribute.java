@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.springframework.data.redis.core.RedisHash;
 
-@RedisHash(value = "attribute", timeToLive = 21600)
+@RedisHash(value = "attribute")
 public class Attribute implements Serializable {
 
 	private static final long serialVersionUID = 8039459337476742529L;
